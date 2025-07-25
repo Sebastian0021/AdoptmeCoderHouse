@@ -1,9 +1,9 @@
-// src/middlewares/errors/index.js
 import EErrors from "../../utils/errors/enums.js";
 
 export default (error, req, res, next) => {
-  console.error("Error detectado en el manejador de errores:");
-  console.error(error.cause);
+  req.logger.error(
+    `Error: ${error.name} - Causa: ${error.cause || "No especificada"}`
+  );
 
   switch (error.code) {
     case EErrors.INVALID_TYPES_ERROR:
@@ -14,6 +14,11 @@ export default (error, req, res, next) => {
     case EErrors.USER_EXISTS_ERROR:
       res
         .status(400)
+        .send({ status: "error", error: error.name, cause: error.cause });
+      break;
+    case EErrors.AUTHENTICATION_ERROR:
+      res
+        .status(401)
         .send({ status: "error", error: error.name, cause: error.cause });
       break;
     case EErrors.RESOURCE_NOT_FOUND_ERROR:
@@ -27,12 +32,10 @@ export default (error, req, res, next) => {
         .send({ status: "error", error: error.name, cause: error.cause });
       break;
     default:
-      res
-        .status(500)
-        .send({
-          status: "error",
-          error: "Unhandled error",
-          cause: error.cause,
-        });
+      res.status(500).send({
+        status: "error",
+        error: "Unhandled error",
+        cause: error.cause,
+      });
   }
 };

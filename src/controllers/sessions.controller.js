@@ -12,7 +12,7 @@ const register = async (req, res, next) => {
 
     // Validamos que los campos no estén vacíos
     if (!first_name || !last_name || !email || !password) {
-      CustomError.createError({
+      throw CustomError.createError({
         name: "Error de Creación de Usuario",
         cause: generateUserErrorInfo({ first_name, last_name, email }),
         message: "Error al intentar crear el usuario",
@@ -22,7 +22,7 @@ const register = async (req, res, next) => {
 
     const exists = await usersService.getUserByEmail(email);
     if (exists) {
-      CustomError.createError({
+      throw CustomError.createError({
         name: "Conflicto de Usuario",
         cause: `El email '${email}' ya está en uso.`,
         message: "El usuario ya existe.",
@@ -45,61 +45,123 @@ const register = async (req, res, next) => {
   }
 };
 
-const login = async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password)
-    return res
-      .status(400)
-      .send({ status: "error", error: "Incomplete values" });
-  const user = await usersService.getUserByEmail(email);
-  if (!user)
-    return res
-      .status(404)
-      .send({ status: "error", error: "User doesn't exist" });
-  const isValidPassword = await passwordValidation(user, password);
-  if (!isValidPassword)
-    return res
-      .status(400)
-      .send({ status: "error", error: "Incorrect password" });
-  const userDto = UserDTO.getUserTokenFrom(user);
-  const token = jwt.sign(userDto, "tokenSecretJWT", { expiresIn: "1h" });
-  res
-    .cookie("coderCookie", token, { maxAge: 3600000 })
-    .send({ status: "success", message: "Logged in" });
+const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      throw CustomError.createError({
+        name: "Error de Autenticación",
+        cause: "Email o contraseña no proporcionados.",
+        message: "Valores incompletos.",
+        code: EErrors.INVALID_TYPES_ERROR,
+      });
+    }
+
+    const user = await usersService.getUserByEmail(email);
+    if (!user) {
+      throw CustomError.createError({
+        name: "Error de Autenticación",
+        cause: "Usuario no encontrado",
+        message: "Credenciales inválidas.",
+        code: EErrors.AUTHENTICATION_ERROR,
+      });
+    }
+
+    const isValidPassword = await passwordValidation(user, password);
+    if (!isValidPassword) {
+      throw CustomError.createError({
+        name: "Error de Autenticación",
+        cause: "Contraseña incorrecta.",
+        message: "Credenciales inválidas.",
+        code: EErrors.AUTHENTICATION_ERROR,
+      });
+    }
+
+    const userDto = UserDTO.getUserTokenFrom(user);
+    const token = jwt.sign(userDto, "tokenSecretJWT", { expiresIn: "1h" });
+    res
+      .cookie("coderCookie", token, { maxAge: 3600000 })
+      .send({ status: "success", message: "Login exitoso" });
+  } catch (error) {
+    next(error);
+  }
 };
 
-const current = async (req, res) => {
-  const cookie = req.cookies["coderCookie"];
-  const user = jwt.verify(cookie, "tokenSecretJWT");
-  if (user) return res.send({ status: "success", payload: user });
+const current = async (req, res, next) => {
+  try {
+    const cookie = req.cookies["coderCookie"];
+    if (!cookie) {
+      throw CustomError.createError({
+        name: "Error de Autorización",
+        cause: "No se encontró el token en las cookies.",
+        message: "Acceso denegado.",
+        code: EErrors.AUTHENTICATION_ERROR,
+      });
+    }
+
+    const user = jwt.verify(cookie, "tokenSecretJWT");
+    res.send({ status: "success", payload: user });
+  } catch (error) {
+    next(error); // El error de jwt ya tiene suficiente información
+  }
 };
 
-const unprotectedLogin = async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password)
-    return res
-      .status(400)
-      .send({ status: "error", error: "Incomplete values" });
-  const user = await usersService.getUserByEmail(email);
-  if (!user)
-    return res
-      .status(404)
-      .send({ status: "error", error: "User doesn't exist" });
-  const isValidPassword = await passwordValidation(user, password);
-  if (!isValidPassword)
-    return res
-      .status(400)
-      .send({ status: "error", error: "Incorrect password" });
-  const token = jwt.sign(user, "tokenSecretJWT", { expiresIn: "1h" });
-  res
-    .cookie("unprotectedCookie", token, { maxAge: 3600000 })
-    .send({ status: "success", message: "Unprotected Logged in" });
+const unprotectedLogin = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      throw CustomError.createError({
+        name: "Error de Autenticación",
+        cause: "Email o contraseña no proporcionados.",
+        message: "Valores incompletos.",
+        code: EErrors.INVALID_TYPES_ERROR,
+      });
+    }
+    const user = await usersService.getUserByEmail(email);
+    if (!user) {
+      throw CustomError.createError({
+        name: "Error de Autenticación",
+        cause: "Usuario no encontrado",
+        message: "Credenciales inválidas.",
+        code: EErrors.AUTHENTICATION_ERROR,
+      });
+    }
+    const isValidPassword = await passwordValidation(user, password);
+    if (!isValidPassword) {
+      throw CustomError.createError({
+        name: "Error de Autenticación",
+        cause: "Contraseña incorrecta.",
+        message: "Credenciales inválidas.",
+        code: EErrors.AUTHENTICATION_ERROR,
+      });
+    }
+    const token = jwt.sign(user, "tokenSecretJWT", { expiresIn: "1h" });
+    res
+      .cookie("unprotectedCookie", token, { maxAge: 3600000 })
+      .send({ status: "success", message: "Unprotected Logged in" });
+  } catch (error) {
+    next(error);
+  }
 };
-const unprotectedCurrent = async (req, res) => {
-  const cookie = req.cookies["unprotectedCookie"];
-  const user = jwt.verify(cookie, "tokenSecretJWT");
-  if (user) return res.send({ status: "success", payload: user });
+
+const unprotectedCurrent = async (req, res, next) => {
+  try {
+    const cookie = req.cookies["unprotectedCookie"];
+    if (!cookie) {
+      throw CustomError.createError({
+        name: "Error de Autorización",
+        cause: "No se encontró el token en las cookies.",
+        message: "Acceso denegado.",
+        code: EErrors.AUTHENTICATION_ERROR,
+      });
+    }
+    const user = jwt.verify(cookie, "tokenSecretJWT");
+    res.send({ status: "success", payload: user });
+  } catch (error) {
+    next(error);
+  }
 };
+
 export default {
   current,
   login,
