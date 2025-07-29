@@ -1,6 +1,6 @@
-# Proyecto Final: AdoptMe - Backend 3
+# Proyecto Final: AdoptMe - Backend CoderHouse
 
-Este repositorio contiene el proyecto final para el curso de Backend 3. La aplicación es un sistema de gestión para un centro de adopción de mascotas llamado "AdoptMe".
+Este repositorio contiene el proyecto final para el curso de Backend. La aplicación es un sistema de gestión para un centro de adopción de mascotas llamado "AdoptMe".
 
 **Nota Importante:** Este proyecto se construyó sobre una base inicial proporcionada por el curso. Las siguientes secciones detallan las **características, mejoras y refactorizaciones clave** que fueron implementadas para agregar valor, robustez y funcionalidades de nivel profesional a la aplicación.
 
@@ -18,7 +18,6 @@ Se abandonó el manejo de errores en línea (`res.status().send()`) en favor de 
 - **Clase `CustomError`:** Una clase personalizada que permite generar errores con información detallada, incluyendo un `código` interno, un `nombre` y una `causa` específica.
 - **Plantillas de Mensajes (`info.js`):** Funciones que generan mensajes de error descriptivos y dinámicos para el cliente, facilitando la depuración.
 - **Middleware Global de Errores:** Un único middleware que intercepta todos los errores lanzados en la aplicación, los registra con el logger y envía una respuesta JSON estandarizada al cliente.
-- **Refactorización Completa:** Todos los controladores (`sessions`, `users`, `pets`, `adoptions`, `mocks`) fueron refactorizados para utilizar este nuevo sistema, haciendo la aplicación más robusta y mantenible.
 
 ### 2. Logger Profesional con Winston
 
@@ -27,7 +26,6 @@ Se reemplazó el uso de `console.log()` por un logger profesional (Winston) con 
 - **Configuración por Entorno:**
   - **Desarrollo:** Registra todos los niveles de logs (desde `debug` hasta `fatal`) únicamente en la consola, con un formato simple y colores para facilitar la lectura.
   - **Producción:** Registra en consola solo los niveles informativos (`info` y superiores) y guarda todos los errores (`error` y `fatal`) en un archivo físico (`errors.log`) para su posterior análisis y auditoría.
-- **Niveles Personalizados:** Se definieron niveles de log semánticos para clasificar los eventos del servidor: `fatal`, `error`, `warning`, `info`, `http`, `debug`.
 - **Middleware de Logging:** Se implementó un middleware que se ejecuta en cada petición para registrar la actividad `http` del servidor automáticamente.
 - **Endpoint de Prueba (`/loggerTest`):** Se creó una ruta específica para probar que todos los niveles del logger funcionan correctamente en el entorno actual.
 
@@ -37,13 +35,24 @@ Se integró la librería `faker-js` y se crearon endpoints dedicados a la genera
 
 - **Generación de Datos al Vuelo:**
   - `GET /api/mocks/mockingpets`: Genera y devuelve un JSON con 100 mascotas falsas sin guardarlas en la base de datos.
-  - `GET /api/mocks/mockingusers`: Genera y devuelve un JSON con 50 usuarios falsos.
 - **Población de la Base de Datos:**
   - `POST /api/mocks/generateData`: Un endpoint que permite poblar la base de datos con una cantidad configurable de usuarios y mascotas, ideal para inicializar el entorno de pruebas.
 
-### 4. Consistencia en la Arquitectura
+### 4. Documentación de API con Swagger
 
-Se aseguró que las nuevas funcionalidades respetaran y reforzaran la arquitectura en capas del proyecto. Por ejemplo, la lógica de los endpoints de mocking fue extraída de las rutas y movida a su propio controlador (`mocks.controller.js`) para mantener la separación de responsabilidades.
+Para facilitar el uso y las pruebas de la API, se integró **Swagger**, generando una documentación interactiva y auto-descriptiva.
+
+- **Integración con `swagger-jsdoc` y `swagger-ui-express`:** Se utilizan estas dos librerías para generar la documentación a partir de archivos de definición en formato `YAML`.
+- **Definiciones por Módulo:** La documentación de cada router (`Sessions`, `Pets`, `Adoptions`) se encuentra en archivos `.yaml` separados dentro de la carpeta `src/docs`, manteniendo el código de las rutas limpio.
+- **Endpoint de Documentación:** La interfaz de usuario de Swagger está disponible en el endpoint `GET /api/docs`, permitiendo a los desarrolladores explorar y probar cada endpoint de forma interactiva.
+
+### 5. Suite de Testing Completa
+
+Se desarrolló una suite de pruebas funcionales utilizando **Mocha**, **Chai** y **Supertest** para garantizar la calidad y el correcto funcionamiento de los endpoints principales.
+
+- **Cobertura Total:** Se crearon tests para todos los endpoints de los routers de `Users`, `Pets` y `Adoptions`, cubriendo el ciclo completo de operaciones (CRUD).
+- **Pruebas de Lógica de Negocio:** Los tests no solo verifican los códigos de estado, sino también los efectos secundarios en la base de datos (por ejemplo, que una mascota adoptada cambie su estado y se asigne al usuario correcto).
+- **Entorno de Prueba Aislado:** Se utilizan hooks como `before` y `after` para preparar y limpiar la base de datos antes y después de cada suite de pruebas, asegurando que los tests sean independientes y no dejen datos residuales.
 
 ---
 
@@ -64,7 +73,7 @@ Se aseguró que las nuevas funcionalidades respetaran y reforzaran la arquitectu
 3.  **Configurar variables de entorno:**
 
     - Crear un archivo `.env` en la raíz del proyecto.
-    - Copiar el contenido de un archivo `.env.example` (si existe) o añadir las siguientes variables:
+    - Añadir las siguientes variables:
       ```env
       PORT=8080
       URL_MONGO=<TU_URL_DE_CONEXION_A_MONGODB>
@@ -72,6 +81,7 @@ Se aseguró que las nuevas funcionalidades respetaran y reforzaran la arquitectu
       ```
 
 4.  **Ejecutar el proyecto:**
+
     - **Modo Desarrollo (con `nodemon`):**
       ```bash
       npm run dev
@@ -79,6 +89,18 @@ Se aseguró que las nuevas funcionalidades respetaran y reforzaran la arquitectu
     - **Modo Producción:**
       ```bash
       npm start
+      ```
+
+5.  **Ejecutar los Tests:**
+    - **Correr todos los tests:**
+      ```bash
+      npm test
+      ```
+    - **Correr tests de forma aislada:**
+      ```bash
+      npm run test:users
+      npm run test:pets
+      npm run test:adoptions
       ```
 
 ---
@@ -93,3 +115,4 @@ La API está organizada en torno a los siguientes recursos:
 - `/api/sessions`: Registro y Login de usuarios.
 - `/api/mocks`: Endpoints para generación de datos de prueba.
 - `/loggerTest`: Endpoint para probar el logger.
+- `/api/docs`: Interfaz de usuario de Swagger con la documentación de la API.
