@@ -68,11 +68,52 @@ const deleteUser = async (req, res, next) => {
       });
     }
 
-    // Lógica de eliminación que faltaba
     await usersService.delete(userId);
 
     req.logger.warning(`Usuario con ID ${userId} ha sido eliminado.`);
     res.send({ status: "success", message: "Usuario eliminado" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const uploadDocuments = async (req, res, next) => {
+  try {
+    const { uid } = req.params;
+    const user = await usersService.getUserById(uid);
+
+    if (!user) {
+      throw CustomError.createError({
+        name: "Error de Carga de Archivos",
+        cause: generateUserNotFoundErrorInfo(uid),
+        message: "No se pudo encontrar el usuario para asociar los documentos.",
+        code: EErrors.RESOURCE_NOT_FOUND_ERROR,
+      });
+    }
+
+    if (!req.files || req.files.length === 0) {
+      throw CustomError.createError({
+        name: "Error de Carga de Archivos",
+        cause: "No se adjuntó ningún archivo en la solicitud.",
+        message: "No se proporcionaron archivos.",
+        code: EErrors.INVALID_TYPES_ERROR,
+      });
+    }
+
+    const documents = req.files.map((file) => ({
+      name: file.originalname,
+      reference: file.path,
+    }));
+
+    // Añadimos los nuevos documentos a los existentes
+    const updatedDocuments = [...user.documents, ...documents];
+
+    await usersService.update(uid, { documents: updatedDocuments });
+
+    res.send({
+      status: "success",
+      message: "Documentos subidos exitosamente.",
+    });
   } catch (error) {
     next(error);
   }
@@ -83,4 +124,5 @@ export default {
   getAllUsers,
   getUser,
   updateUser,
+  uploadDocuments,
 };

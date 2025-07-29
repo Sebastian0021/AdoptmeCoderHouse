@@ -77,6 +77,12 @@ const login = async (req, res, next) => {
       });
     }
 
+    //Actualizamos la fecha de última conexión.
+    user.last_connection = new Date();
+    await usersService.update(user._id, {
+      last_connection: user.last_connection,
+    });
+
     const userDto = UserDTO.getUserTokenFrom(user);
     const token = jwt.sign(userDto, "tokenSecretJWT", { expiresIn: "1h" });
     res
@@ -84,6 +90,32 @@ const login = async (req, res, next) => {
       .send({ status: "success", message: "Login exitoso" });
   } catch (error) {
     next(error);
+  }
+};
+
+const logout = async (req, res, next) => {
+  try {
+    const cookie = req.cookies["coderCookie"];
+    if (cookie) {
+      const userToken = jwt.verify(cookie, "tokenSecretJWT");
+      if (userToken && userToken.email) {
+        const user = await usersService.getUserByEmail(userToken.email);
+        if (user) {
+          user.last_connection = new Date();
+          await usersService.update(user._id, {
+            last_connection: user.last_connection,
+          });
+        }
+      }
+    }
+  } catch (error) {
+    req.logger.error(
+      `Error al actualizar last_connection en logout: ${error.message}`
+    );
+  } finally {
+    res
+      .clearCookie("coderCookie")
+      .send({ status: "success", message: "Logout exitoso" });
   }
 };
 
@@ -165,8 +197,8 @@ const unprotectedCurrent = async (req, res, next) => {
 export default {
   current,
   login,
+  logout,
   register,
-  current,
   unprotectedLogin,
   unprotectedCurrent,
 };

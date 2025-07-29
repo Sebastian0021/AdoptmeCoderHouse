@@ -100,7 +100,7 @@ const createPetWithImage = async (req, res, next) => {
       name,
       specie,
       birthDate,
-      image: `${__dirname}/../public/img/${file.filename}`,
+      image: file.path,
     });
 
     req.logger.info(`Mascota a crear: ${JSON.stringify(pet)}`);
