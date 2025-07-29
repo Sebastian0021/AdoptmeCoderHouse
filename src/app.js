@@ -36,3 +36,5 @@ app.use("/", loggerRouter);
 app.use(errorHandler);
 
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+
+export default app;
