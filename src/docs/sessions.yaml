@@ -56,8 +56,26 @@ paths:
                 - password
       responses:
         "200":
-          description: Login exitoso. Se establece una cookie de sesión.
+          description: Login exitoso. Se establece una cookie de sesión y se actualiza 'last_connection'.
         "400":
           description: Valores incompletos.
         "401":
-          description: Credenciales inválidas (usuario no encontrado o contraseña incorrecta).
+          description: Credenciales inválidas.
+  /api/sessions/logout:
+    get:
+      summary: Cierra la sesión del usuario
+      tags:
+        - Sessions
+      responses:
+        "200":
+          description: Logout exitoso. Se limpia la cookie de sesión y se actualiza 'last_connection'.
+  /api/sessions/current:
+    get:
+      summary: Obtiene los datos del usuario actual
+      tags:
+        - Sessions
+      responses:
+        "200":
+          description: Devuelve los datos del usuario almacenados en el token de la cookie.
+        "401":
+          description: No autorizado, token no válido o ausente.

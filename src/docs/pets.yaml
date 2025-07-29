@@ -30,6 +30,72 @@ paths:
           description: Mascota creada exitosamente.
         "400":
           description: Datos incompletos.
+  /api/pets/withimage:
+    post:
+      summary: Crea una nueva mascota con una imagen
+      tags:
+        - Pets
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                specie:
+                  type: string
+                birthDate:
+                  type: string
+                  format: date
+                image:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Mascota con imagen creada exitosamente.
+        "400":
+          description: Datos incompletos.
+  /api/pets/{pid}:
+    put:
+      summary: Actualiza una mascota por su ID
+      tags:
+        - Pets
+      parameters:
+        - name: pid
+          in: path
+          required: true
+          description: ID de la mascota a actualizar.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PetInput"
+      responses:
+        "200":
+          description: Mascota actualizada exitosamente.
+        "404":
+          description: Mascota no encontrada.
+    delete:
+      summary: Elimina una mascota por su ID
+      tags:
+        - Pets
+      parameters:
+        - name: pid
+          in: path
+          required: true
+          description: ID de la mascota a eliminar.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Mascota eliminada exitosamente.
+        "404":
+          description: Mascota no encontrada.
 
 components:
   schemas:
