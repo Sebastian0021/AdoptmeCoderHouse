@@ -54,9 +54,16 @@ Se desarrolló una suite de pruebas funcionales utilizando **Mocha**, **Chai** y
 - **Pruebas de Lógica de Negocio:** Los tests no solo verifican los códigos de estado, sino también los efectos secundarios en la base de datos (por ejemplo, que una mascota adoptada cambie su estado y se asigne al usuario correcto).
 - **Entorno de Prueba Aislado:** Se utilizan hooks como `before` y `after` para preparar y limpiar la base de datos antes y después de cada suite de pruebas, asegurando que los tests sean independientes y no dejen datos residuales.
 
+### 6. Gestión de Usuarios Mejorada
+
+Se ampliaron las funcionalidades del modelo de `User` para incluir más detalles sobre la actividad y los documentos del usuario.
+
+- **Carga de Documentos:** Se implementó un endpoint (`POST /api/users/:uid/documents`) que permite subir archivos asociados a un usuario. El middleware de Multer fue refactorizado para guardar los archivos en carpetas específicas según su propósito (`/documents`, `/pets`, etc.).
+- **Registro de Conexión:** Se añadió el campo `last_connection` al modelo de `User`, el cual se actualiza automáticamente cada vez que un usuario inicia o cierra sesión, permitiendo un mejor seguimiento de la actividad.
+
 ---
 
-## 🚀 Instalación y Puesta en Marcha
+## 🚀 Instalación
 
 1.  **Clonar el repositorio:**
 
@@ -109,10 +116,10 @@ Se desarrolló una suite de pruebas funcionales utilizando **Mocha**, **Chai** y
 
 La API está organizada en torno a los siguientes recursos:
 
-- `/api/users`: CRUD de Usuarios.
+- `/api/users`: CRUD de Usuarios, incluyendo la subida de documentos.
 - `/api/pets`: CRUD de Mascotas.
 - `/api/adoptions`: Gestión de Adopciones.
-- `/api/sessions`: Registro y Login de usuarios.
+- `/api/sessions`: Registro, Login, Logout y sesión actual de usuarios.
 - `/api/mocks`: Endpoints para generación de datos de prueba.
 - `/loggerTest`: Endpoint para probar el logger.
 - `/api/docs`: Interfaz de usuario de Swagger con la documentación de la API.
