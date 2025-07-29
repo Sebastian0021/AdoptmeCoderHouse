@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import env from "./config/dotenv.config.js";
 
+import swaggerUiExpress from "swagger-ui-express";
+import { specs } from "./config/swagger.config.js";
+
 import usersRouter from "./routes/users.router.js";
 import petsRouter from "./routes/pets.router.js";
 import adoptionsRouter from "./routes/adoption.router.js";
@@ -19,6 +22,9 @@ const connection = mongoose.connect(env.URL_MONGO);
 app.use(express.json());
 app.use(cookieParser());
 app.use(addLogger);
+
+// Endpoint para la documentación
+app.use("/api/docs", swaggerUiExpress.serve, swaggerUiExpress.setup(specs));
 
 app.use("/api/users", usersRouter);
 app.use("/api/pets", petsRouter);

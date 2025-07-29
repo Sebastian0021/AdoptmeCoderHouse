@@ -1,0 +1,77 @@
+paths:
+  /api/pets:
+    get:
+      summary: Obtiene todas las mascotas
+      tags:
+        - Pets
+      responses:
+        "200":
+          description: Lista de todas las mascotas.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pet"
+        "500":
+          description: Error de base de datos.
+    post:
+      summary: Crea una nueva mascota
+      tags:
+        - Pets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PetInput"
+      responses:
+        "201":
+          description: Mascota creada exitosamente.
+        "400":
+          description: Datos incompletos.
+
+components:
+  schemas:
+    Pet:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: ID autogenerado por MongoDB.
+        name:
+          type: string
+          description: Nombre de la mascota.
+        specie:
+          type: string
+          description: Especie de la mascota.
+        birthDate:
+          type: string
+          format: date-time
+          description: Fecha de nacimiento de la mascota.
+        adopted:
+          type: boolean
+          description: Estado de adopción.
+        owner:
+          type: string
+          description: ID del dueño (si está adoptada).
+        image:
+          type: string
+          description: URL de la imagen de la mascota.
+      required:
+        - name
+        - specie
+    PetInput:
+      type: object
+      properties:
+        name:
+          type: string
+        specie:
+          type: string
+        birthDate:
+          type: string
+          format: date
+      required:
+        - name
+        - specie
+        - birthDate

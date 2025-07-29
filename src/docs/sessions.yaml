@@ -1,0 +1,63 @@
+paths:
+  /api/sessions/register:
+    post:
+      summary: Registra un nuevo usuario
+      tags:
+        - Sessions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                  description: Nombre del usuario
+                last_name:
+                  type: string
+                  description: Apellido del usuario
+                email:
+                  type: string
+                  description: Correo electrónico del usuario
+                password:
+                  type: string
+                  description: Contraseña del usuario
+              required:
+                - first_name
+                - last_name
+                - email
+                - password
+      responses:
+        "201":
+          description: Usuario registrado exitosamente. Devuelve el ID del nuevo usuario.
+        "400":
+          description: Datos incompletos o el usuario ya existe.
+  /api/sessions/login:
+    post:
+      summary: Inicia sesión de un usuario
+      tags:
+        - Sessions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: Correo electrónico del usuario
+                password:
+                  type: string
+                  description: Contraseña del usuario
+              required:
+                - email
+                - password
+      responses:
+        "200":
+          description: Login exitoso. Se establece una cookie de sesión.
+        "400":
+          description: Valores incompletos.
+        "401":
+          description: Credenciales inválidas (usuario no encontrado o contraseña incorrecta).
