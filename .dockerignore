@@ -1,0 +1,16 @@
+# Ignora las dependencias de desarrollo, ya que se instalan dentro del contenedor.
+node_modules
+
+# Ignora el archivo de variables de entorno local, estas se deben gestionar en el entorno de despliegue.
+.env
+
+# Ignora los logs de errores.
+errors.log
+
+# Ignora archivos de configuración de IDEs o sistemas operativos.
+.vscode
+.idea
+*.DS_Store
+
+# Ignora la carpeta de tests, no es necesaria en producción.
+test/

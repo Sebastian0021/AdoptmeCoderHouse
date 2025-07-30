@@ -63,7 +63,37 @@ Se ampliaron las funcionalidades del modelo de `User` para incluir más detalles
 
 ---
 
-## 🚀 Instalación
+## 🐳 Despliegue con Docker
+
+Este proyecto está preparado para ser ejecutado en un contenedor de Docker.
+
+### Imagen en Docker Hub
+
+Puedes encontrar la imagen pública de este proyecto en Docker Hub:
+
+- **Link a la imagen:** `https://hub.docker.com/r/sebastian0021/adoptme-coderhouse`
+
+### Construir la Imagen
+
+Para construir la imagen de Docker localmente, ejecuta el siguiente comando en la raíz del proyecto:
+
+```bash
+docker build -t adoptme-coderhouse .
+```
+
+### Correr el Contenedor
+
+Para ejecutar la aplicación en un contenedor, utiliza el siguiente comando. Asegúrate de reemplazar `<TU_URL_DE_CONEXION_A_MONGODB>` con tu cadena de conexión de MongoDB.
+
+```bash
+docker run -p 8080:8080 -e URL_MONGO="<TU_URL_DE_CONEXION_A_MONGODB>" --name adoptme-app adoptme-coderhouse
+```
+
+**Nota sobre la conexión a MongoDB desde Docker:** Si tu base de datos MongoDB está corriendo en tu máquina local (localhost), no puedes usar `localhost:27017` desde dentro del contenedor. En su lugar, debes usar `host.docker.internal:27017` en Windows/Mac o la IP de tu máquina en la red de Docker en Linux (puedes encontrarla con `ip addr show docker0`).
+
+---
+
+## 🚀 Instalación Local (Sin Docker)
 
 1.  **Clonar el repositorio:**
 
